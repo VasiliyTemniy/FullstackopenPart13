@@ -11,25 +11,6 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
-
-const errorHandler = (error, request, response, next) => {
-  logger.error(error.message)
-
-  if (error.name === 'CastError') {
-    return response.status(400).json({ error: 'malformatted id' })
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
-  } else if (error.name === 'JsonWebTokenError') {
-    return response.status(401).json({ error: 'invalid token' })
-  } else if (error.name === 'TokenExpiredError') {
-    return response.status(401).json({ error: 'token expired' })
-  }
-  next(error)
-}
-
 const verifyToken = (request, response, next) => {
   const authorization = request.get('authorization')
   const token =
@@ -58,10 +39,34 @@ const verifyToken = (request, response, next) => {
 //   next()
 // }
 
+const errorHandler = (error, request, response, next) => {
+
+  logger.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).json({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  } else if (error.name === 'JsonWebTokenError') {
+    return response.status(401).json({ error: 'invalid token' })
+  } else if (error.name === 'TokenExpiredError') {
+    return response.status(401).json({ error: 'token expired' })
+  } else if (error.name === 'SequelizeValidationError') {
+    return response.status(400).json({ error: 'Invalid blog data' })
+  } else if (error.message === 'No entry') {
+    return response.status(404).send({ error: 'Invalid id' })
+  }
+  next(error)
+}
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
 module.exports = {
   requestLogger,
-  unknownEndpoint,
-  errorHandler,
   verifyToken,
   // userExtractor
+  errorHandler,
+  unknownEndpoint
 }

@@ -23,7 +23,7 @@ testingRouter.put('/:id&lotlikes', async (request, response) => {
 
     response.json(blog)
   } else {
-    response.status(404).end()
+    throw new Error('No entry')
   }
 
 })

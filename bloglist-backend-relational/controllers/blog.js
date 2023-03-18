@@ -19,13 +19,8 @@ blogsRouter.post(
       // comments: [],
     }
 
-    try {
-      const savedBlog = await Blog.create(blog)
-      response.status(201).json(savedBlog)
-    }
-    catch (e) {
-      return response.status(400).json({ e })
-    }
+    const savedBlog = await Blog.create(blog)
+    response.status(201).json(savedBlog)
   },
 )
 
@@ -41,7 +36,7 @@ blogsRouter.get('/:id', async (request, response) => {
   if (blog) {
     response.json(blog)
   } else {
-    response.status(404).end()
+    throw new Error('No entry')
   }
 })
 
@@ -113,7 +108,7 @@ blogsRouter.put(
 
       response.json(blog)
     } else {
-      response.status(404).end()
+      throw new Error('No entry')
     }
 
   },
@@ -170,7 +165,7 @@ blogsRouter.put(
 
       response.json(blog)
     } else {
-      response.status(404).end()
+      throw new Error('No entry')
     }
   },
 )
