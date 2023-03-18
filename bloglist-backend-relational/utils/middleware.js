@@ -1,7 +1,7 @@
 const logger = require('./logger')
 const jwt = require('jsonwebtoken')
 const config = require('./config')
-// const User = require('../models/user')
+const { User } = require('../models')
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method)
@@ -33,11 +33,11 @@ const verifyToken = (request, response, next) => {
   next()
 }
 
-// const userExtractor = async (request, response, next) => {
-//   const user = await User.findById(request.userId)
-//   request.user = user
-//   next()
-// }
+const userExtractor = async (request, response, next) => {
+  const user = await User.findByPk(request.userId)
+  request.user = user
+  next()
+}
 
 const errorHandler = (error, request, response, next) => {
 
@@ -51,10 +51,14 @@ const errorHandler = (error, request, response, next) => {
     return response.status(401).json({ error: 'invalid token' })
   } else if (error.name === 'TokenExpiredError') {
     return response.status(401).json({ error: 'token expired' })
+  } else if (error.name === 'SequelizeValidationError' && error.message === 'Validation error: Validation isEmail on username failed') {
+    return response.status(400).json({ error: 'Validation isEmail on username failed' })
   } else if (error.name === 'SequelizeValidationError') {
-    return response.status(400).json({ error: 'Invalid blog data' })
-  } else if (error.message === 'No entry') {
-    return response.status(404).send({ error: 'Invalid id' })
+    return response.status(400).json({ error: 'Validation error' })
+  } else if (error.message === 'No blog entry') {
+    return response.status(404).send({ error: 'Invalid blog id' })
+  } else if (error.message === 'No user entry') {
+    return response.status(404).send({ error: 'Invalid user id' })
   }
   next(error)
 }
@@ -66,7 +70,7 @@ const unknownEndpoint = (request, response) => {
 module.exports = {
   requestLogger,
   verifyToken,
-  // userExtractor
+  userExtractor,
   errorHandler,
   unknownEndpoint
 }

@@ -1,12 +1,12 @@
 const blogsRouter = require('express').Router()
-const { Blog } = require('../models/blog')
-// const User = require('../models/user')
-// const middleware = require('../utils/middleware')
+const { Blog } = require('../models')
+const { User } = require('../models')
+const middleware = require('../utils/middleware')
 
 blogsRouter.post(
   '/',
-  // middleware.verifyToken,
-  // middleware.userExtractor,
+  middleware.verifyToken,
+  middleware.userExtractor,
   async (request, response) => {
     const body = request.body
 
@@ -15,7 +15,7 @@ blogsRouter.post(
       author: body.author,
       url: body.url,
       likes: 0,
-      // user: request.user._id,
+      userId: request.userId,
       // comments: [],
     }
 
@@ -25,60 +25,63 @@ blogsRouter.post(
 )
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog.findAll()
+  const blogs = await Blog.findAll({
+    attributes: { exclude: ['userId'] },
+    include: {
+      model: User,
+      attributes: ['name']
+    }
+  })
 
   response.json(blogs)
 })
 
 blogsRouter.get('/:id', async (request, response) => {
-  const blog = await Blog.findByPk(request.params.id)
+  const blog = await Blog.findByPk(request.params.id, {
+    attributes: { exclude: ['userId'] },
+    include: {
+      model: User,
+      attributes: ['name']
+    }
+  })
 
   if (blog) {
     response.json(blog)
   } else {
-    throw new Error('No entry')
+    throw new Error('No blog entry')
   }
 })
 
 blogsRouter.delete(
   '/:id',
-  // middleware.verifyToken,
-  // middleware.userExtractor,
+  middleware.verifyToken,
+  middleware.userExtractor,
   async (request, response) => {
-    // let user = request.user
-    // const indexToDelete = user.blogs.indexOf(request.params.id)
-    // if (indexToDelete === -1) {
-    //   response.status(403).json({ error: "attempt to delete another user's blog" })
-    // } else {
-    //   user.blogs.splice(indexToDelete, 1)
+    let user = request.user
+    const blog = await Blog.findByPk(request.params.id)
 
-    //   const { username, name, passwordHash, blogs } = user
+    if (!blog) {
+      throw new Error('No blog entry')
+    }
 
-    //   await User.findByIdAndUpdate(
-    //     request.user.id,
-    //     { username, name, passwordHash, blogs },
-    //     { new: true, runValidators: true, context: 'query' },
-    //   )
-
-    //   await Blog.findByIdAndRemove(request.params.id)
-    //   response.status(204).end()
-    // }
-
-    await Blog.destroy({
-      where: {
-        id: request.params.id
-      }
-    })
-
-    response.status(204).end()
-
+    if (user.id !== blog.userId) {
+      response.status(403).json({ error: 'attempt to delete another user\'s blog' })
+    } else {
+      await Blog.destroy({
+        where: {
+          id: request.params.id
+        }
+      })
+  
+      response.status(204).end()
+    }
   },
 )
 
 blogsRouter.put(
   '/:id&like',
-  // middleware.verifyToken,
-  // middleware.userExtractor,
+  middleware.verifyToken,
+  middleware.userExtractor,
   async (request, response) => {
 
     // const wasLiked = request.user.likedBlogs.indexOf(request.params.id) === -1 ? false : true
@@ -108,7 +111,7 @@ blogsRouter.put(
 
       response.json(blog)
     } else {
-      throw new Error('No entry')
+      throw new Error('No blog entry')
     }
 
   },
@@ -165,7 +168,7 @@ blogsRouter.put(
 
       response.json(blog)
     } else {
-      throw new Error('No entry')
+      throw new Error('No blog entry')
     }
   },
 )
