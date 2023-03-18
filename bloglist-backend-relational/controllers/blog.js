@@ -29,9 +29,15 @@ blogsRouter.get('/', async (request, response) => {
 
   const where = {}
 
-  if (request.query.search) {
+  if (request.query.stitle) {
     where.title = {
-      [Op.substring]: request.query.search
+      [Op.substring]: request.query.stitle
+    }
+  }
+
+  if (request.query.sauthor) {
+    where.author = {
+      [Op.substring]: request.query.sauthor
     }
   }
 
