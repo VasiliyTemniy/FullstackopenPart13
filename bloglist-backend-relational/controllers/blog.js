@@ -80,30 +80,44 @@ blogsRouter.delete(
   },
 )
 
-// blogsRouter.put(
-//   '/:id&like',
-//   middleware.verifyToken,
-//   middleware.userExtractor,
-//   async (request, response) => {
+blogsRouter.put(
+  '/:id&like',
+  // middleware.verifyToken,
+  // middleware.userExtractor,
+  async (request, response) => {
 
-//     const wasLiked = request.user.likedBlogs.indexOf(request.params.id) === -1 ? false : true
-//     if (wasLiked) {
-//       return response.status(403).json({ error: "attempt to like a blog twice" })
-//     } else {
-//       const blog = await Blog.findById(request.params.id, 'likes').exec()
-//       const updatedBlog = await Blog.findByIdAndUpdate(
-//         request.params.id,
-//         { likes: blog.likes +1 },
-//         { new: true, runValidators: true, context: 'query' },
-//       )
+    // const wasLiked = request.user.likedBlogs.indexOf(request.params.id) === -1 ? false : true
+    // if (wasLiked) {
+    //   return response.status(403).json({ error: "attempt to like a blog twice" })
+    // } else {
+    //   const blog = await Blog.findById(request.params.id, 'likes').exec()
+    //   const updatedBlog = await Blog.findByIdAndUpdate(
+    //     request.params.id,
+    //     { likes: blog.likes +1 },
+    //     { new: true, runValidators: true, context: 'query' },
+    //   )
 
-//       request.user.likedBlogs = request.user.likedBlogs.concat(updatedBlog._id)
-//       await request.user.save()
+    //   request.user.likedBlogs = request.user.likedBlogs.concat(updatedBlog._id)
+    //   await request.user.save()
 
-//       response.json(updatedBlog)
-//     }
-//   },
-// )
+    //   response.json(updatedBlog)
+    // }
+
+    const blog = await Blog.findByPk(request.params.id)
+
+    if (blog) {
+
+      blog.likes = blog.likes + 1
+
+      await blog.save()
+
+      response.json(blog)
+    } else {
+      response.status(404).end()
+    }
+
+  },
+)
 
 // blogsRouter.put(
 //   '/:id&comment',
