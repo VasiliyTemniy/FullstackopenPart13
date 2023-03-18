@@ -23,7 +23,7 @@ const sequelize = new Sequelize(config.DATABASE_URL, {
       rejectUnauthorized: false
     }
   },
-});
+})
 logger.info('connecting to', config.DATABASE_URL)
 
 
