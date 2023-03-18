@@ -2,6 +2,7 @@ const blogsRouter = require('express').Router()
 const { Blog } = require('../models')
 const { User } = require('../models')
 const middleware = require('../utils/middleware')
+const { Op } = require('sequelize')
 
 blogsRouter.post(
   '/',
@@ -25,12 +26,22 @@ blogsRouter.post(
 )
 
 blogsRouter.get('/', async (request, response) => {
+
+  const where = {}
+
+  if (request.query.search) {
+    where.title = {
+      [Op.substring]: request.query.search
+    }
+  }
+
   const blogs = await Blog.findAll({
     attributes: { exclude: ['userId'] },
     include: {
       model: User,
       attributes: ['name']
-    }
+    },
+    where
   })
 
   response.json(blogs)
