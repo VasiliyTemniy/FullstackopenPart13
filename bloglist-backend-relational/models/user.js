@@ -25,6 +25,10 @@ User.init({
   passwordHash: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  likedBlogs: {
+    type: DataTypes.ARRAY(DataTypes.INTEGER),
+    defaultValue: []
   }
 }, {
   sequelize,

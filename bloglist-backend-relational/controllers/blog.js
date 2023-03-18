@@ -57,7 +57,7 @@ blogsRouter.delete(
   middleware.verifyToken,
   middleware.userExtractor,
   async (request, response) => {
-    let user = request.user
+    const user = request.user
     const blog = await Blog.findByPk(request.params.id)
 
     if (!blog) {
@@ -84,34 +84,28 @@ blogsRouter.put(
   middleware.userExtractor,
   async (request, response) => {
 
-    // const wasLiked = request.user.likedBlogs.indexOf(request.params.id) === -1 ? false : true
-    // if (wasLiked) {
-    //   return response.status(403).json({ error: "attempt to like a blog twice" })
-    // } else {
-    //   const blog = await Blog.findById(request.params.id, 'likes').exec()
-    //   const updatedBlog = await Blog.findByIdAndUpdate(
-    //     request.params.id,
-    //     { likes: blog.likes +1 },
-    //     { new: true, runValidators: true, context: 'query' },
-    //   )
+    const user = request.user
 
-    //   request.user.likedBlogs = request.user.likedBlogs.concat(updatedBlog._id)
-    //   await request.user.save()
+    const wasLiked = user.likedBlogs.indexOf(Number(request.params.id)) === -1 ? false : true
 
-    //   response.json(updatedBlog)
-    // }
-
-    const blog = await Blog.findByPk(request.params.id)
-
-    if (blog) {
-
-      blog.likes = blog.likes + 1
-
-      await blog.save()
-
-      response.json(blog)
+    if (wasLiked) {
+      return response.status(403).json({ error: 'attempt to like a blog twice' })
     } else {
-      throw new Error('No blog entry')
+
+      const blog = await Blog.findByPk(request.params.id)
+
+      if (blog) {
+
+        blog.likes = blog.likes + 1
+        await blog.save()
+  
+        user.likedBlogs = request.user.likedBlogs.concat(blog.id)
+        await user.save()
+  
+        response.json(blog)
+      } else {
+        throw new Error('No blog entry')
+      }
     }
 
   },
@@ -136,29 +130,19 @@ blogsRouter.put(
 
 blogsRouter.put(
   '/:id',
-  // middleware.verifyToken,
-  // middleware.userExtractor,
+  middleware.verifyToken,
+  middleware.userExtractor,
   async (request, response) => {
     const { title, author, url } = request.body
-    // const indexToUpdate = request.user.blogs.indexOf(request.params.id)
-
-    // if (indexToUpdate === -1) {
-    //   return response.status(403).json({ error: "attempt to update another user's blog" })
-    // } else {
-    //   const blog = await Blog.findById(request.params.id, 'comments').exec()
-    //   const updatedBlog = await Blog.findByIdAndUpdate(
-    //     request.params.id,
-    //     { title, author, url, likes: blog.likes, user: blog.user, comments: blog.comments },
-    //     { new: true, runValidators: true, context: 'query' },
-    //   )
-
-    //   response.json(updatedBlog)
-    // }
-
+    const user = request.user
 
     const blog = await Blog.findByPk(request.params.id)
 
     if (blog) {
+
+      if (user.id !== blog.userId) {
+        response.status(403).json({ error: 'attempt to update another user\'s blog' })
+      }
 
       blog.title = title
       blog.author = author

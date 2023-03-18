@@ -3,8 +3,8 @@ const { Blog } = require('../models')
 const { User } = require('../models')
 
 testingRouter.post('/reset', async (request, response) => {
-  await Blog.destroy()
-  await User.destroy()
+  await Blog.sync({force: true})
+  await User.sync({force: true})
 
   response.status(204).end()
 })

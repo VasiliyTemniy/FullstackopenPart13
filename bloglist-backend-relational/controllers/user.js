@@ -52,13 +52,6 @@ usersRouter.put(
   async (request, response) => {
     const { username, name, password } = request.body
 
-    // const existingUser = await User.findOne({
-    //   where: {username: username}
-    // })
-    // if (existingUser) {
-    //   return response.status(400).json({ error: 'username must be unique' })
-    // }
-
     if (password === undefined || password.length <= 3) {
       return response
         .status(400)
