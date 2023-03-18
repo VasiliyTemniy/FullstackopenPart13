@@ -30,37 +30,46 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs)
 })
 
-// blogsRouter.get('/:id', async (request, response) => {
-//   const blog = await Blog.findById(request.params.id).populate('user', { username: 1, name: 1 }).exec()
+blogsRouter.get('/:id', async (request, response) => {
+  const blog = await Blog.findByPk(request.params.id)
 
-//   response.json(blog)
-// })
+  response.json(blog)
+})
 
-// blogsRouter.delete(
-//   '/:id',
-//   middleware.verifyToken,
-//   middleware.userExtractor,
-//   async (request, response) => {
-//     let user = request.user
-//     const indexToDelete = user.blogs.indexOf(request.params.id)
-//     if (indexToDelete === -1) {
-//       response.status(403).json({ error: "attempt to delete another user's blog" })
-//     } else {
-//       user.blogs.splice(indexToDelete, 1)
+blogsRouter.delete(
+  '/:id',
+  // middleware.verifyToken,
+  // middleware.userExtractor,
+  async (request, response) => {
+    // let user = request.user
+    // const indexToDelete = user.blogs.indexOf(request.params.id)
+    // if (indexToDelete === -1) {
+    //   response.status(403).json({ error: "attempt to delete another user's blog" })
+    // } else {
+    //   user.blogs.splice(indexToDelete, 1)
 
-//       const { username, name, passwordHash, blogs } = user
+    //   const { username, name, passwordHash, blogs } = user
 
-//       await User.findByIdAndUpdate(
-//         request.user.id,
-//         { username, name, passwordHash, blogs },
-//         { new: true, runValidators: true, context: 'query' },
-//       )
+    //   await User.findByIdAndUpdate(
+    //     request.user.id,
+    //     { username, name, passwordHash, blogs },
+    //     { new: true, runValidators: true, context: 'query' },
+    //   )
 
-//       await Blog.findByIdAndRemove(request.params.id)
-//       response.status(204).end()
-//     }
-//   },
-// )
+    //   await Blog.findByIdAndRemove(request.params.id)
+    //   response.status(204).end()
+    // }
+
+    await Blog.destroy({
+      where: {
+        id: request.params.id
+      }
+    })
+
+    response.status(204).end()
+
+  },
+)
 
 // blogsRouter.put(
 //   '/:id&like',
@@ -104,27 +113,38 @@ blogsRouter.get('/', async (request, response) => {
 //   },
 // )
 
-// blogsRouter.put(
-//   '/:id',
-//   middleware.verifyToken,
-//   middleware.userExtractor,
-//   async (request, response) => {
-//     const { title, author, url } = request.body
-//     const indexToUpdate = request.user.blogs.indexOf(request.params.id)
+blogsRouter.put(
+  '/:id',
+  // middleware.verifyToken,
+  // middleware.userExtractor,
+  async (request, response) => {
+    const { title, author, url } = request.body
+    // const indexToUpdate = request.user.blogs.indexOf(request.params.id)
 
-//     if (indexToUpdate === -1) {
-//       return response.status(403).json({ error: "attempt to update another user's blog" })
-//     } else {
-//       const blog = await Blog.findById(request.params.id, 'comments').exec()
-//       const updatedBlog = await Blog.findByIdAndUpdate(
-//         request.params.id,
-//         { title, author, url, likes: blog.likes, user: blog.user, comments: blog.comments },
-//         { new: true, runValidators: true, context: 'query' },
-//       )
+    // if (indexToUpdate === -1) {
+    //   return response.status(403).json({ error: "attempt to update another user's blog" })
+    // } else {
+    //   const blog = await Blog.findById(request.params.id, 'comments').exec()
+    //   const updatedBlog = await Blog.findByIdAndUpdate(
+    //     request.params.id,
+    //     { title, author, url, likes: blog.likes, user: blog.user, comments: blog.comments },
+    //     { new: true, runValidators: true, context: 'query' },
+    //   )
 
-//       response.json(updatedBlog)
-//     }
-//   },
-// )
+    //   response.json(updatedBlog)
+    // }
+
+
+    const blog = await Blog.findByPk(request.params.id)
+
+    blog.title = title
+    blog.author = author
+    blog.url = url
+
+    await blog.save()
+
+    response.json(blog)
+  },
+)
 
 module.exports = blogsRouter
