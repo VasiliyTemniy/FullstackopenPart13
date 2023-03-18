@@ -27,17 +27,22 @@ blogsRouter.post(
 
 blogsRouter.get('/', async (request, response) => {
 
-  const where = {}
+  let where = {}
 
-  if (request.query.stitle) {
-    where.title = {
-      [Op.substring]: request.query.stitle
-    }
-  }
-
-  if (request.query.sauthor) {
-    where.author = {
-      [Op.substring]: request.query.sauthor
+  if (request.query.search) {
+    where = {
+      [Op.or]: [
+        {
+          title: {
+            [Op.iLike]: `%${request.query.search}%`
+          }
+        },
+        {
+          author: {
+            [Op.iLike]: `%${request.query.search}%`
+          }
+        },
+      ]
     }
   }
 
