@@ -51,10 +51,16 @@ const errorHandler = (error, request, response, next) => {
     return response.status(401).json({ error: 'invalid token' })
   } else if (error.name === 'TokenExpiredError') {
     return response.status(401).json({ error: 'token expired' })
-  } else if (error.name === 'SequelizeValidationError' && error.message === 'Validation error: Validation isEmail on username failed') {
-    return response.status(400).json({ error: 'Validation isEmail on username failed' })
   } else if (error.name === 'SequelizeValidationError') {
-    return response.status(400).json({ error: 'Validation error' })
+    if (error.message === 'Validation error: Validation isEmail on username failed') {
+      return response.status(400).json({ error: 'Validation isEmail on username failed' })
+    } else if (error.message === 'notNull Violation: blog.year cannot be null') {
+      return response.status(400).json({ error: 'Specify blog creation year' })
+    } else if (error.message === 'Validation error: Validation min on year failed' || error.message === 'Validation error: Validation max on year failed') {
+      return response.status(400).json({ error: 'Invalid year' })
+    } else {
+      return response.status(400).json({ error: 'Validation error' })
+    }
   } else if (error.message === 'No blog entry') {
     return response.status(404).send({ error: 'Invalid blog id' })
   } else if (error.message === 'No user entry') {

@@ -17,6 +17,7 @@ blogsRouter.post(
       url: body.url,
       likes: 0,
       userId: request.userId,
+      year: body.year
       // comments: [],
     }
 
@@ -158,7 +159,7 @@ blogsRouter.put(
   middleware.verifyToken,
   middleware.userExtractor,
   async (request, response) => {
-    const { title, author, url } = request.body
+    const { title, author, url, year } = request.body
     const user = request.user
 
     const blog = await Blog.findByPk(request.params.id)
@@ -172,6 +173,7 @@ blogsRouter.put(
       blog.title = title
       blog.author = author
       blog.url = url
+      blog.year = year
 
       await blog.save()
 
