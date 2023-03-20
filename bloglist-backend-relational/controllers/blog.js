@@ -48,7 +48,7 @@ blogsRouter.get('/', async (request, response) => {
   }
 
   const blogs = await Blog.findAll({
-    attributes: { exclude: ['userId'] },
+    attributes: { exclude: ['userId', 'createdAt', 'updatedAt'] },
     include: {
       model: User,
       attributes: ['name']
@@ -64,7 +64,7 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.get('/:id', async (request, response) => {
   const blog = await Blog.findByPk(request.params.id, {
-    attributes: { exclude: ['userId'] },
+    attributes: { exclude: ['userId', 'createdAt', 'updatedAt'] },
     include: {
       model: User,
       attributes: ['name']

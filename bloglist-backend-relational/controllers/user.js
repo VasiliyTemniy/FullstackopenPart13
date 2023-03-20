@@ -1,7 +1,6 @@
 const bcryptjs = require('bcryptjs')
 const usersRouter = require('express').Router()
-const { User } = require('../models')
-const { Blog } = require('../models')
+const { User, Blog } = require('../models')
 const middleware = require('../utils/middleware')
 
 usersRouter.post('/', async (request, response) => {
@@ -36,10 +35,13 @@ usersRouter.post('/', async (request, response) => {
 
 usersRouter.get('/', async (request, response) => {
   const users = await User.findAll({
-    include: {
-      model: Blog,
-      attributes: { exclude: ['userId'] }
-    }
+    attributes: { exclude: ['createdAt', 'updatedAt', 'passwordHash'] },
+    include: [
+      {
+        model: Blog,
+        attributes: { exclude: ['userId', 'createdAt', 'updatedAt'] }
+      }
+    ],
   })
 
   response.json(users)
@@ -79,11 +81,28 @@ usersRouter.put(
 
 usersRouter.get('/:id', async (request, response) => {
 
+  let where = {}
+  if (request.query.read) {
+    where = { read: request.query.read === 'true' }
+  }
+
   const user = await User.findByPk(request.params.id, {
-    include: {
-      model: Blog,
-      attributes: { exclude: ['userId'] }
-    }
+    attributes: { exclude: ['createdAt', 'updatedAt', 'passwordHash'] },
+    include: [
+      {
+        model: Blog,
+        attributes: { exclude: ['userId', 'createdAt', 'updatedAt'] }
+      },
+      {
+        model: Blog,
+        as: 'readings',
+        attributes: { exclude: ['userId', 'createdAt', 'updatedAt'] },
+        through: {
+          attributes: ['read', 'id'],
+          where
+        },
+      }
+    ]
   })
 
   if (user) {
