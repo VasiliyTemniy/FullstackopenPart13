@@ -6,6 +6,7 @@ readingRouter.post(
   '/',
   middleware.verifyToken,
   middleware.userExtractor,
+  middleware.sessionCheck,
   async (request, response) => {
 
     const reading = {
@@ -23,6 +24,7 @@ readingRouter.put(
   '/:id',
   middleware.verifyToken,
   middleware.userExtractor,
+  middleware.sessionCheck,
   async (request, response) => {
 
     const user = request.user

@@ -35,7 +35,7 @@ usersRouter.post('/', async (request, response) => {
 
 usersRouter.get('/', async (request, response) => {
   const users = await User.findAll({
-    attributes: { exclude: ['createdAt', 'updatedAt', 'passwordHash'] },
+    attributes: { exclude: ['createdAt', 'updatedAt', 'passwordHash', 'disabled', 'admin'] },
     include: [
       {
         model: Blog,
@@ -51,6 +51,7 @@ usersRouter.put(
   '/:id',
   middleware.verifyToken,
   middleware.userExtractor,
+  middleware.sessionCheck,
   async (request, response) => {
     const { username, name, password } = request.body
 
@@ -87,7 +88,7 @@ usersRouter.get('/:id', async (request, response) => {
   }
 
   const user = await User.findByPk(request.params.id, {
-    attributes: { exclude: ['createdAt', 'updatedAt', 'passwordHash'] },
+    attributes: { exclude: ['createdAt', 'updatedAt', 'passwordHash', 'disabled', 'admin'] },
     include: [
       {
         model: Blog,

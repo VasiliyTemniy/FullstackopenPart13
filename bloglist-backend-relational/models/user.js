@@ -29,12 +29,40 @@ User.init({
   likedBlogs: {
     type: DataTypes.ARRAY(DataTypes.INTEGER),
     defaultValue: []
-  }
+  },
+  disabled: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  admin: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
 }, {
   sequelize,
   underscored: true,
   timestamps: true,
-  modelName: 'user'
+  modelName: 'user',
+  defaultScope: {
+    where: {
+      disabled: false
+    }
+  },
+  scopes: {
+    admin: {
+      where: {
+        admin: true
+      }
+    },
+    disabled: {
+      where: {
+        disabled: true
+      }
+    },
+    all: {}
+  }
 })
 
 module.exports = User

@@ -1,7 +1,7 @@
 const logger = require('./logger')
 const jwt = require('jsonwebtoken')
 const config = require('./config')
-const { User } = require('../models')
+const { User, Session } = require('../models')
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method)
@@ -39,7 +39,22 @@ const userExtractor = async (request, response, next) => {
   next()
 }
 
-const errorHandler = (error, request, response, next) => {
+const sessionCheck = async (request, response, next) => {
+  const session = await Session.findOne({
+    where: {
+      userId: request.userId,
+      token: request.token
+    }
+  })
+
+  if (!session) {
+    return response.status(401).json({ error: 'Inactive session. Please, login' })
+  }
+
+  next()
+}
+
+const errorHandler = async (error, request, response, next) => {
 
   logger.error(error.message)
 
@@ -50,6 +65,12 @@ const errorHandler = (error, request, response, next) => {
   } else if (error.name === 'JsonWebTokenError') {
     return response.status(401).json({ error: 'invalid token' })
   } else if (error.name === 'TokenExpiredError') {
+    await Session.destroy({
+      where: {
+        userId: request.userId,
+        token: request.token
+      }
+    })
     return response.status(401).json({ error: 'token expired' })
   } else if (error.name === 'SequelizeValidationError') {
     if (error.message === 'Validation error: Validation isEmail on username failed') {
@@ -77,6 +98,7 @@ module.exports = {
   requestLogger,
   verifyToken,
   userExtractor,
+  sessionCheck,
   errorHandler,
   unknownEndpoint
 }

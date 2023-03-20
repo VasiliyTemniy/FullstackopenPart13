@@ -7,6 +7,7 @@ const usersRouter = require('./controllers/user')
 const loginRouter = require('./controllers/login')
 const authorsRouter = require('./controllers/authors')
 const readingRouter = require('./controllers/readinglists')
+const adminRouter = require('./controllers/admin')
 const middleware = require('./utils/middleware')
 
 
@@ -22,6 +23,7 @@ app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/authors', authorsRouter)
 app.use('/api/readinglists', readingRouter)
+app.use('/api/admin', adminRouter)
 
 if (process.env.NODE_ENV === 'test') {
   const testingRouter = require('./controllers/testing')

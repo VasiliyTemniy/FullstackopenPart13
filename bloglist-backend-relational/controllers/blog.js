@@ -8,6 +8,7 @@ blogsRouter.post(
   '/',
   middleware.verifyToken,
   middleware.userExtractor,
+  middleware.sessionCheck,
   async (request, response) => {
     const body = request.body
 
@@ -82,6 +83,7 @@ blogsRouter.delete(
   '/:id',
   middleware.verifyToken,
   middleware.userExtractor,
+  middleware.sessionCheck,
   async (request, response) => {
     const user = request.user
     const blog = await Blog.findByPk(request.params.id)
@@ -108,6 +110,7 @@ blogsRouter.put(
   '/:id&like',
   middleware.verifyToken,
   middleware.userExtractor,
+  middleware.sessionCheck,
   async (request, response) => {
 
     const user = request.user
@@ -158,6 +161,7 @@ blogsRouter.put(
   '/:id',
   middleware.verifyToken,
   middleware.userExtractor,
+  middleware.sessionCheck,
   async (request, response) => {
     const { title, author, url, year } = request.body
     const user = request.user

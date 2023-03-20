@@ -28,4 +28,21 @@ testingRouter.put('/:id&lotlikes', async (request, response) => {
 
 })
 
+testingRouter.put('/admin/:id', async (request, response) => {
+
+  const user = await User.findByPk(request.params.id)
+
+  if (user) {
+
+    user.admin = request.body.admin
+
+    await user.save()
+
+    response.json(user)
+  } else {
+    throw new Error('No entry')
+  }
+
+})
+
 module.exports = testingRouter
